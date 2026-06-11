@@ -10,7 +10,7 @@ def carregarModeloPln():
     global modeloPln
 
     if modeloPln is None:
-        modeloPln = spacy.load("pt_core_news_sm", disable=["ner"])
+        modeloPln = spacy.load("pt_core_news_md", disable=["ner"])
 
     return modeloPln
 
@@ -45,7 +45,7 @@ def _extrairTokens(documento):
         termo = normalizarTermo(token.lemma_ or token.text)
 
         if termo and termo.isalpha():
-            tokens.append(termo)
+            tokens.append((termo, token.text))
 
     return tokens
 

@@ -26,7 +26,9 @@ Objetivo: Transformar a linguagem natural em matrizes lógicas computáveis.
 - Extração e Limpeza Estrutural (Regex): O sistema consome as notas taquigráficas brutas em PDF e utiliza Expressões Regulares (biblioteca nativa re do Python) para realizar o parsing e apagar ruídos institucionais que "enganariam" o cálculo de similaridade. São removidos sumariamente:
 
     - Cabeçalhos e paginações (ex: "Sessão de: 10/02/2026", "3/54").
+
     - Títulos de seção em caixa alta (ex: "ORDEM DO DIA").
+    
     - Rubricas do taquígrafo (ex: "(Pausa.)").
 
 - Limpeza Textual: O sistema consome as notas taquigráficas reais e utiliza uma biblioteca externa de PLN (spaCy) para remover stopwords (termos irrelevantes) e aplicar a lematização (reduzindo plurais e conjugações verbais à sua raiz).

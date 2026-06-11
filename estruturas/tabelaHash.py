@@ -5,6 +5,8 @@ from dataclasses import dataclass
 class EntradaHash:
     chave: str
     idPalavra: int
+    original: str = ""
+    ocorrencias: int = 0
 
 
 class TabelaHash:
@@ -16,11 +18,12 @@ class TabelaHash:
         self.palavrasPorId = []
         self.idsDisponiveis = []
 
-    def obterId(self, chave):
+    def obterId(self, chave, original=""):
         posicao = self._encontrarPosicao(chave)
         entrada = self.vetor[posicao]
 
         if isinstance(entrada, EntradaHash):
+            entrada.ocorrencias += 1
             return entrada.idPalavra
 
         if self.idsDisponiveis:
@@ -30,7 +33,7 @@ class TabelaHash:
             idPalavra = len(self.palavrasPorId)
             self.palavrasPorId.append(chave)
 
-        self.vetor[posicao] = EntradaHash(chave, idPalavra)
+        self.vetor[posicao] = EntradaHash(chave, idPalavra, original, ocorrencias=1)
         self.quantidade += 1
 
         if self.quantidade / self.tamanho > 0.7:
@@ -38,8 +41,8 @@ class TabelaHash:
 
         return idPalavra
 
-    def inserir(self, chave):
-        return self.obterId(chave)
+    def inserir(self, chave, original=""):
+        return self.obterId(chave, original)
 
     def buscar(self, chave):
         posicaoInicial = self._hash1(chave)

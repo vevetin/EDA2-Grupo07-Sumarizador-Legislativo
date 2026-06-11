@@ -34,7 +34,7 @@ def processarBloco1(discursos, normalizarFrase=None):
     discursosProcessados = []
 
     for discurso, tokens in zip(discursos, tokensPorDiscurso):
-        idsTokens = [vocabulario.obterId(token) for token in tokens]
+        idsTokens = [vocabulario.obterId(chave, original) for chave, original in tokens]
         bitset = 0
 
         for idPalavra in idsTokens:
@@ -87,11 +87,16 @@ def _removerDuplicatas(tokens):
     vistos = TabelaHash()
     tokensUnicos = []
 
-    for token in tokens:
-        if vistos.buscar(token) is not None:
+    for item in tokens:
+        if isinstance(item, tuple):
+            chave, original = item
+        else:
+            chave, original = item, item
+
+        if vistos.buscar(chave) is not None:
             continue
-        vistos.inserir(token)
-        tokensUnicos.append(token)
+        vistos.inserir(chave, original)
+        tokensUnicos.append((chave, original))
 
     return tokensUnicos
 
@@ -103,16 +108,16 @@ def salvarVisualizacaoHash(tabela, caminhoArquivo):
     linhas.append(f"Tabela Hash — {tabela.quantidade} entradas / {tabela.tamanho} slots")
     linhas.append(f"Fator de carga: {tabela.quantidade / tabela.tamanho:.2%}")
     linhas.append("")
-    linhas.append(f"{'Índice':<8} {'Status':<10} {'ID':<6} {'Chave'}")
-    linhas.append("-" * 50)
+    linhas.append(f"{'Índice':<8} {'Status':<10} {'ID':<6} {'Ocorrências':<12} {'Chave':<20} {'Original'}")
+    linhas.append("-" * 80)
 
     for indice, entrada in enumerate(tabela.vetor):
         if entrada is None:
-            linhas.append(f"{indice:<8} {'vazio':<10} {'—':<6} {'—'}")
+            linhas.append(f"{indice:<8} {'vazio':<10} {'—':<6} {'—':<12} {'—':<20} {'—'}")
         elif entrada is tabela.lapide:
-            linhas.append(f"{indice:<8} {'lápide':<10} {'—':<6} {'—'}")
+            linhas.append(f"{indice:<8} {'lápide':<10} {'—':<6} {'—':<12} {'—':<20} {'—'}")
         else:
-            linhas.append(f"{indice:<8} {'ocupado':<10} {entrada.idPalavra:<6} {entrada.chave}")
+            linhas.append(f"{indice:<8} {'ocupado':<10} {entrada.idPalavra:<6} {entrada.ocorrencias:<12} {entrada.chave:<20} {entrada.original}")
 
     caminhoArquivo.write_text("\n".join(linhas), encoding="utf-8")
 
