@@ -20,6 +20,6 @@ test:
 	$(PYTEST) testes/ -v
 
 clean:
-	rm -rf dados/saida/*.json
+	rm -rf dados/saida/*
 	rm -rf .pytest_cache
 	find . -type d -name __pycache__ -exec rm -rf {} +
