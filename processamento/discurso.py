@@ -13,3 +13,5 @@ class DiscursoProcessado:
     frase: str
     tokens: list[int] = field(default_factory=list)
     bitset: int = 0
+    indiceOriginal: int = -1
+    relevancia: float = 0.0

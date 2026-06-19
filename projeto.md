@@ -1,67 +1,142 @@
-Proposta de Projeto: Sumarização Extrativa de Debates Legislativos via Grafos
+# Status Atual do Projeto – Sumarização Extrativa de Debates Legislativos
 
-1. Visão Geral do Projeto
+## Visão Geral
 
-1.1. O Problema e a Área de Aplicação
-A área de aplicação escolhida é a política legislativa. O problema que buscamos resolver é a enorme dificuldade técnica e cognitiva em acompanhar, processar e extrair rapidamente os principais argumentos e decisões contidos nas notas taquigráficas e transcrições de debates parlamentares, que costumam ser documentos longos, exaustivos e complexos.
+O projeto tem como objetivo desenvolver um sistema de sumarização extrativa para debates legislativos, utilizando grafos para identificar automaticamente os discursos mais representativos de uma sessão parlamentar. A arquitetura foi dividida em quatro blocos principais, responsáveis pelo processamento do texto, modelagem do grafo, cálculo de relevância e geração do resumo final.
 
-1.2. A Solução Proposta
-Desenvolver um software em linguagem nativa capaz de consumir essas transcrições reais e executar uma sumarização extrativa automática. O sistema analisará a força semântica das declarações para identificar, extrair e compilar apenas as frases mais relevantes que sustentam o núcleo do debate, entregando um resumo direto ao usuário.
+## Bloco 1 – Pré-processamento e Tokenização
 
-1.3. Estruturas de Dados Utilizadas
-A arquitetura não utiliza bibliotecas prontas de grafos e combina três estruturas fundamentais para alcançar alto desempenho:
+### Objetivo
 
-- Grafos Densos (Matriz de Adjacência): Estrutura principal para mapear a rede de similaridade entre as frases.
-    
-- Tabela de Dispersão (Hash Table): Estrutura adicional para tokenização e mapeamento do vocabulário em tempo de busca O(1).
-    
-- Fila de Prioridades (Heap de Máximo): Estrutura adicional para ordenar as notas e extrair iterativamente o ranqueamento das frases (Top-K).
+Transformar as transcrições parlamentares em uma representação computacional adequada para análise.
 
-2. Fluxo de Execução Detalhado (Pipeline do Sistema)
-A arquitetura do sumarizador foi modelada em quatro blocos lógicos sequenciais, desenhados para otimizar o processamento de texto e a análise de grafos densos.
+### Implementação
 
-Bloco 1: Pré-processamento e Tokenização (Tabela Hash + Bitsets)
-Objetivo: Transformar a linguagem natural em matrizes lógicas computáveis.
+* Limpeza estrutural das notas taquigráficas.
+* Remoção de ruídos textuais.
+* Tokenização e normalização dos termos.
+* Construção do vocabulário utilizando tabela hash.
+* Representação dos discursos por meio de bitsets.
 
-- Extração e Limpeza Estrutural (Regex): O sistema consome as notas taquigráficas brutas em PDF e utiliza Expressões Regulares (biblioteca nativa re do Python) para realizar o parsing e apagar ruídos institucionais que "enganariam" o cálculo de similaridade. São removidos sumariamente:
+### Status
 
-    - Cabeçalhos e paginações (ex: "Sessão de: 10/02/2026", "3/54").
+**Concluído**
 
-    - Títulos de seção em caixa alta (ex: "ORDEM DO DIA").
-    
-    - Rubricas do taquígrafo (ex: "(Pausa.)").
+Os discursos já são convertidos para uma estrutura eficiente de armazenamento e consulta, servindo como entrada para as etapas posteriores.
 
-- Limpeza Textual: O sistema consome as notas taquigráficas reais e utiliza uma biblioteca externa de PLN (spaCy) para remover stopwords (termos irrelevantes) e aplicar a lematização (reduzindo plurais e conjugações verbais à sua raiz).
-    
-- Mapeamento String-Número (Anti-Overflow): A palavra limpa é convertida em um número inteiro pela Regra de Horner Iterativa. O espalhamento é aplicado a cada iteração multiplicativa (x = (x * 256 + char) % M), garantindo que o limite de memória da máquina não estoure ao processar textos gigantes.
-    
-- Mapeamento Hash: O valor numérico determina o índice da palavra na Tabela Hash de Endereçamento Aberto.
-    - Caso ocorra colisão de índices, o sistema utiliza o Hashing Duplo. A segunda função hash (fhash2) calcula um salto personalizado para encontrar um espaço vazio.
-    
-    - Para evitar loops infinitos, o tamanho da tabela (M) será um número primo e a função de salto retornará um valor estritamente coprimo e maior que zero.
-    
-    - Caso exclusões sejam necessárias no vetor, o algoritmo insere Lápides (Tombstones) — marcadores lógicos (ex: -1) que mantêm a trilha de colisões intacta.
+---
 
-- Saída: O vocabulário global é mapeado e cada frase original do debate se transforma em um Bitset (um vetor de zeros e uns), indicando precisamente quais palavras (IDs) ela contém.
+## Bloco 2 – Construção do Grafo de Similaridade
 
-Bloco 2: Modelagem do Grafo Denso (Índice de Jaccard)
-Objetivo: Construir a rede de relacionamentos semânticos cruzando os dados das frases.
+### Objetivo
 
-    Definição Teórica: O sistema cria um grafo não direcionado e ponderado, onde cada Vértice (V) é uma frase da sessão parlamentar.
-    Análise Combinatória Simétrica: O algoritmo cruza todos os pares possíveis de vértices comparando seus respectivos Bitsets. Através de operações de porta lógica ultrarrápidas (|AND| / |OR|), calcula-se a interseção e união do vocabulário.
-    Cálculo do Peso: A relação de similaridade exata gerada pelas portas lógicas forma o Índice de Jaccard, que varia de 0 a 1 e representa o "peso" da aresta entre as duas frases.
-    Saída (Matriz de Adjacência): Como em um texto de debate parlamentar quase todas as frases possuem algum nível de conexão vocabular, o projeto gera um grafo altamente conectado. Esses pesos são armazenados em uma Matriz de Adjacência Densa (O(V2)), que possibilita acesso e manipulação imediatos.
+Modelar as relações semânticas entre os discursos do debate.
 
-Bloco 3: Influência Relacional e Análise Estrutural
-Objetivo: Quantificar o peso de importância de cada declaração no ecossistema do debate.
+### Implementação
 
-    Cálculo de Centralidade de Grau: O algoritmo navega pelas linhas da Matriz de Adjacência densa gerada no Bloco 2.
-    Soma Ponderada: Para um dado vértice (frase), o processador soma os valores numéricos de todas as arestas (Jaccard) incidentes sobre ele.
-    Saída: O sistema produz um vetor de notas (scores). Frases com notas mais altas são matematicamente identificadas como os "nós centrais" da sessão — ou seja, as declarações que mais possuem similaridade com o restante do debate e, portanto, representam a essência da pauta.
+* Comparação entre os bitsets dos discursos.
+* Cálculo do Índice de Jaccard para cada par de discursos.
+* Construção da matriz de adjacência ponderada.
+* Armazenamento das similaridades em um grafo não direcionado.
 
-Bloco 4: Ranqueamento e Extração Top-K (Fila de Prioridades)
-Objetivo: Filtrar os vértices vencedores e exibir o resultado legível.
+### Status
 
-    Estrutura Max-Heap: O vetor de notas desordenado do bloco anterior é inserido em uma Fila de Prioridades (Heap de Máximo), moldada como uma Árvore Binária Completa.
-    Ranqueamento Otimizado: Evitamos ordenar a matriz inteira. Para construir o resumo, aplicamos a operação de extração da raiz iterativamente K vezes. A própria propriedade do Heap garante que o elemento extraído da raiz sempre será o de maior prioridade absoluta naquele momento, possuindo um custo logarítmico extremamente eficiente.
-    Saída Final: O sistema mapeia os K vértices extraídos de volta para as suas respectivas linhas de texto original. O programa imprime na tela o Resumo Extrativo, contendo apenas o suprassumo do que foi debatido no parlamento.
+**Concluído**
+
+O sistema já é capaz de gerar a rede de similaridade entre os discursos, produzindo a estrutura necessária para os cálculos de relevância.
+
+---
+
+## Bloco 3 – Análise Estrutural e Cálculo de Relevância
+
+### Objetivo
+
+Identificar quais discursos possuem maior importância dentro da rede construída.
+
+### Implementação Prevista
+
+A relevância de cada discurso será calculada por meio da centralidade de grau ponderada. Para cada vértice do grafo, serão somados os pesos das arestas incidentes, produzindo uma nota de relevância.
+
+### Alteração de Modelagem
+
+Inicialmente, o resultado dessa etapa seria armazenado em uma lista separada contendo apenas os scores dos discursos.
+
+Entretanto, foi identificada uma melhoria na modelagem: adicionar um atributo de relevância diretamente à classe que representa cada discurso.
+
+Com essa alteração:
+
+* Cada objeto armazenará seu próprio score.
+* A associação entre discurso e nota torna-se direta.
+* Reduz-se a dependência de estruturas paralelas.
+* Facilita-se a implementação do ranqueamento no Bloco 4.
+
+### Status
+
+**Concluído**
+
+---
+
+## Bloco 4 – Ranqueamento e Geração do Resumo
+
+### Objetivo
+
+Selecionar os discursos mais relevantes para compor o resumo extrativo.
+
+### Implementação Prevista
+
+* Inserção dos discursos em uma fila de prioridades (Max-Heap).
+* Extração dos K discursos de maior relevância.
+* Recuperação do texto original associado a cada discurso selecionado.
+* Geração do resumo final.
+
+### Status
+
+**Não iniciado**
+
+A implementação deste bloco começará após a conclusão do Bloco 3.
+
+---
+
+## Situação Atual
+
+### Concluído
+
+* Bloco 1 – Pré-processamento e Tokenização.
+* Bloco 2 – Construção do Grafo de Similaridade.
+* Bloco 3 – Análise Estrutural e Cálculo de Relevância.
+
+### Em andamento
+
+* Bloco 4 – Ranqueamento e Geração do Resumo.
+
+### Próximos Passos
+
+1. Implementar a Max-Heap para ranqueamento.
+2. Desenvolver a extração Top-K.
+3. Integrar todos os blocos e realizar testes com transcrições reais.
+
+## Dúvidas para Discussão com a Equipe
+
+### Geração do Resumo
+
+Após o cálculo das notas de relevância e o ranqueamento dos discursos, como será definido o conjunto de discursos que comporá o resumo final?
+
+Algumas possibilidades levantadas até o momento são:
+
+* Selecionar os K discursos mais relevantes;
+* Selecionar uma porcentagem dos discursos do documento;
+* Utilizar algum limiar mínimo de relevância.
+
+### Variação entre Documentos
+
+Como o sistema deve se comportar diante de documentos com tamanhos muito diferentes?
+
+Um mesmo critério de seleção funcionará adequadamente para debates curtos e longos ou será necessário adaptar o tamanho do resumo de acordo com o documento analisado?
+
+### Redundância de Informações
+
+Discursos muito semelhantes podem receber notas de relevância próximas. Será necessário implementar algum mecanismo para evitar que informações repetidas apareçam no resumo final?
+
+### Organização da Saída
+
+Após selecionar os discursos mais relevantes, eles devem ser exibidos em ordem de relevância ou reordenados conforme sua posição original no debate para preservar a sequência lógica da discussão?

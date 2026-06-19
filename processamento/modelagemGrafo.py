@@ -9,7 +9,6 @@ from estruturas.grafoMatriz import adicionarAresta, criarGrafo
 class ResultadoBloco2:
     grafo: object
     discursos: list
-    indicesOriginais: list[int]
 
 
 def calcularIndiceJaccard(bitsetA, bitsetB):
@@ -24,13 +23,12 @@ def calcularIndiceJaccard(bitsetA, bitsetB):
 
 def processarBloco2(discursos):
     discursosValidos = []
-    indicesOriginais = []
 
     for indiceOriginal, discurso in enumerate(discursos):
         if discurso.bitset == 0:
             continue
+        discurso.indiceOriginal = indiceOriginal
         discursosValidos.append(discurso)
-        indicesOriginais.append(indiceOriginal)
 
     grafo = criarGrafo(len(discursosValidos))
 
@@ -47,7 +45,6 @@ def processarBloco2(discursos):
     return ResultadoBloco2(
         grafo=grafo,
         discursos=discursosValidos,
-        indicesOriginais=indicesOriginais,
     )
 
 
@@ -67,14 +64,15 @@ def salvarDiscursosGrafo(resultado, diretorioSaida):
     caminhoDiscursos = diretorioSaida / "grafoDiscursos.json"
     discursos = []
 
-    for indiceGrafo, discurso in enumerate(resultado.discursos):
+    for discurso in resultado.discursos:
         discursos.append(
             {
-                "indiceOriginal": resultado.indicesOriginais[indiceGrafo],
+                "indiceOriginal": discurso.indiceOriginal,
                 "orador": discurso.orador,
                 "frase": discurso.frase,
                 "tokens": discurso.tokens,
                 "bitset": bin(discurso.bitset),
+                "relevancia": discurso.relevancia,
             }
         )
 
