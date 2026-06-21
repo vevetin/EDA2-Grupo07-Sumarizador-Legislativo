@@ -1,16 +1,16 @@
 import argparse
-import json
 from dataclasses import dataclass
 from pathlib import Path
 
 from estruturas.tabelaHash import TabelaHash
 from processamento.centralidadeGrau import calcularCentralidadeGrau
-from processamento.discurso import DiscursoProcessado
+from processamento.discurso import Discurso
 from processamento.extratorPDF import extrairTextoPdf
 from processamento.geradorResumo import gerarResumoPdf, salvarResumoJson, selecionarDiscursosResumo
 from processamento.limpezaEstrutural import extrairDiscursosDeTexto
 from processamento.modelagemGrafo import construirGrafoSimilaridade, salvarDiscursosGrafo, salvarMatrizAdjacencia
 from processamento.processadorPLN import normalizarFrasesEmLote
+from processamento.saida import salvarResultadoTokenizacao, salvarVisualizacaoHash
 
 DIRETORIO_ENTRADA_PADRAO = Path("dados/entrada")
 DIRETORIO_SAIDA_PADRAO = Path("dados/saida")
@@ -19,7 +19,7 @@ DIRETORIO_SAIDA_PADRAO = Path("dados/saida")
 @dataclass
 class ResultadoTokenizacao:
     vocabulario: TabelaHash
-    discursos: list[DiscursoProcessado]
+    discursos: list[Discurso]
 
 
 def _removerDuplicatas(tokens):
@@ -54,25 +54,14 @@ def tokenizarDiscursos(discursos, normalizarFrase=None):
         for tokens in todosTokens:
             tokensPorDiscurso.append(_removerDuplicatas(tokens))
 
-    discursosProcessados = []
-
     for discurso, tokens in zip(discursos, tokensPorDiscurso):
-        idsTokens = [vocabulario.obterId(chave, original) for chave, original in tokens]
-        bitset = 0
+        discurso.tokens = [vocabulario.obterId(chave, original) for chave, original in tokens]
+        discurso.bitset = 0
 
-        for idPalavra in idsTokens:
-            bitset |= 1 << idPalavra
+        for idPalavra in discurso.tokens:
+            discurso.bitset |= 1 << idPalavra
 
-        discursosProcessados.append(
-            DiscursoProcessado(
-                orador=discurso.orador,
-                frase=discurso.frase,
-                tokens=idsTokens,
-                bitset=bitset,
-            )
-        )
-
-    return ResultadoTokenizacao(vocabulario=vocabulario, discursos=discursosProcessados)
+    return ResultadoTokenizacao(vocabulario=vocabulario, discursos=discursos)
 
 
 def tokenizarPdf(caminhoPdf, normalizarFrase=None):
@@ -80,51 +69,6 @@ def tokenizarPdf(caminhoPdf, normalizarFrase=None):
     discursos = extrairDiscursosDeTexto(texto)
     return tokenizarDiscursos(discursos, normalizarFrase=normalizarFrase)
 
-
-def salvarResultadoTokenizacao(resultado, diretorioSaida):
-    diretorioSaida = Path(diretorioSaida)
-    diretorioSaida.mkdir(parents=True, exist_ok=True)
-
-    caminhoVocabulario = diretorioSaida / "vocabulario.json"
-    vocabulario = resultado.vocabulario.listarPalavras()
-    caminhoVocabulario.write_text(
-        json.dumps(vocabulario, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    caminhoDiscursos = diretorioSaida / "discursos.json"
-    discursos = [
-        {
-            "orador": discurso.orador,
-            "frase": discurso.frase,
-            "tokens": discurso.tokens,
-            "bitset": bin(discurso.bitset),
-        }
-        for discurso in resultado.discursos
-    ]
-    caminhoDiscursos.write_text(
-        json.dumps(discursos, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-
-def salvarVisualizacaoHash(tabela, caminhoArquivo):
-    caminhoArquivo = Path(caminhoArquivo)
-    caminhoArquivo.parent.mkdir(parents=True, exist_ok=True)
-    linhas = []
-    linhas.append(f"Tabela Hash — {tabela.quantidade} entradas / {tabela.tamanho} slots")
-    linhas.append(f"Fator de carga: {tabela.quantidade / tabela.tamanho:.2%}")
-    linhas.append("")
-    linhas.append(f"{'Índice':<8} {'Status':<10} {'ID':<6} {'Ocorrências':<12} {'Chave':<20} {'Original'}")
-    linhas.append("-" * 80)
-
-    for indice, entrada in enumerate(tabela.vetor):
-        if entrada is None:
-            linhas.append(f"{indice:<8} {'vazio':<10} {'—':<6} {'—':<12} {'—':<20} {'—'}")
-        elif entrada is tabela.lapide:
-            linhas.append(f"{indice:<8} {'lápide':<10} {'—':<6} {'—':<12} {'—':<20} {'—'}")
-        else:
-            linhas.append(f"{indice:<8} {'ocupado':<10} {entrada.idPalavra:<6} {entrada.ocorrencias:<12} {entrada.chave:<20} {entrada.original}")
-
-    caminhoArquivo.write_text("\n".join(linhas), encoding="utf-8")
 
 
 def processarDocumento(caminhoPdf, diretorioSaida):

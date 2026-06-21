@@ -7,6 +7,7 @@ from pathlib import Path
 import fitz
 
 from estruturas.filaPrioridade import FilaPrioridadeMaxima
+from estruturas.quickSort import quickSort
 
 
 PERCENTUAL_RESUMO = 0.08
@@ -50,7 +51,7 @@ def selecionarDiscursosResumo(discursos):
         discursosSelecionados.append(candidato)
         bitsetResumo |= candidato.bitset
 
-    discursosSelecionados.sort(key=lambda discurso: discurso.indiceOriginal)
+    quickSort(discursosSelecionados, chave=lambda discurso: discurso.indiceOriginal)
     return ResultadoResumo(
         quantidadePlanejada=quantidadePlanejada,
         discursos=discursosSelecionados,
