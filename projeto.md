@@ -80,63 +80,30 @@ Com essa alteração:
 
 ### Objetivo
 
-Selecionar os discursos mais relevantes para compor o resumo extrativo.
+Selecionar os discursos mais relevantes de forma proporcional ao tamanho do documento, filtrando redundâncias e preservando a cronologia do debate para compor um resumo extrativo coeso.
 
 ### Implementação Prevista
-
-* Inserção dos discursos em uma fila de prioridades (Max-Heap).
-* Extração dos K discursos de maior relevância.
-* Recuperação do texto original associado a cada discurso selecionado.
-* Geração do resumo final.
+* Definição Dinâmica de Limite: Cálculo do valor de "K" (quantidade de extrações) baseado em uma porcentagem do total de discursos.
+* Ranqueamento: Inserção dos discursos (e seus respectivos scores) em uma fila de prioridades (Max-Heap).
+* Extração com Filtro Anti-Redundância: Remoção iterativa dos discursos de maior relevância do topo da Max-Heap, validando-os através de uma operação lógica `AND` com o "Bitset do Resumo" para descartar frases repetitivas. Discursos aceitos atualizam o filtro com uma operação `OR`.
+* Reordenação Temporal: Organização dos discursos aprovados de acordo com sua posição original no texto base.
+* Recuperação e Saída: Recuperação do texto original associado a cada discurso selecionado e geração do resumo final.
 
 ### Status
+**Concluído**
 
-**Não iniciado**
+#### Decisões de Arquitetura e Implementação (Bloco 4)
 
-A implementação deste bloco começará após a conclusão do Bloco 3.
+Com o objetivo de solucionar desafios de redundância, variação de tamanho e coesão textual, as seguintes decisões foram consolidadas e implementadas:
 
----
+##### 1. Geração do Resumo e Variação entre Documentos (K Dinâmico)
+Para lidar com documentos de tamanhos variados sem gerar resumos insuficientes ou excessivos.
+* **Implementação:** A quantidade de frases ("K") é calculada dinamicamente, sendo 8% do total de discursos válidos processados, contendo limites inferiores e superiores (piso de 12 e teto de 60 frases) para garantir um tamanho coerente do texto gerado.
 
-## Situação Atual
+##### 2. Redundância de Informações (Filtro por Bitsets)
+Para evitar que o resumo final contenha frases repetitivas de alta relevância.
+* **Implementação:** Foi criado um "Bitset do Resumo". Durante a extração da Fila de Prioridade, calcula-se a taxa de intersecção (`AND` lógico) dos tokens da frase contra os tokens já presentes no resumo. Se a redundância ultrapassar o limiar de 70%, o discurso é descartado. Caso passe, seus tokens são adicionados ao resumo via `OR` lógico, dispensando novas consultas em matrizes.
 
-### Concluído
-
-* Bloco 1 – Pré-processamento e Tokenização.
-* Bloco 2 – Construção do Grafo de Similaridade.
-* Bloco 3 – Análise Estrutural e Cálculo de Relevância.
-
-### Em andamento
-
-* Bloco 4 – Ranqueamento e Geração do Resumo.
-
-### Próximos Passos
-
-1. Implementar a Max-Heap para ranqueamento.
-2. Desenvolver a extração Top-K.
-3. Integrar todos os blocos e realizar testes com transcrições reais.
-
-## Dúvidas para Discussão com a Equipe
-
-### Geração do Resumo
-
-Após o cálculo das notas de relevância e o ranqueamento dos discursos, como será definido o conjunto de discursos que comporá o resumo final?
-
-Algumas possibilidades levantadas até o momento são:
-
-* Selecionar os K discursos mais relevantes;
-* Selecionar uma porcentagem dos discursos do documento;
-* Utilizar algum limiar mínimo de relevância.
-
-### Variação entre Documentos
-
-Como o sistema deve se comportar diante de documentos com tamanhos muito diferentes?
-
-Um mesmo critério de seleção funcionará adequadamente para debates curtos e longos ou será necessário adaptar o tamanho do resumo de acordo com o documento analisado?
-
-### Redundância de Informações
-
-Discursos muito semelhantes podem receber notas de relevância próximas. Será necessário implementar algum mecanismo para evitar que informações repetidas apareçam no resumo final?
-
-### Organização da Saída
-
-Após selecionar os discursos mais relevantes, eles devem ser exibidos em ordem de relevância ou reordenados conforme sua posição original no debate para preservar a sequência lógica da discussão?
+##### 3. Organização da Saída (Ordem Cronológica)
+Para preservar a lógica original do debate e formato de "Perguntas e Respostas".
+* **Implementação:** Os discursos escolhidos para o Top-K são reordenados utilizando um atributo `indiceOriginal` de cada frase, que guarda a posição no documento nativo, montando um PDF fluido, coerente e com os diálogos agrupados adequadamente pelo orador.

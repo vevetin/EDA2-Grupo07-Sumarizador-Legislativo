@@ -6,7 +6,7 @@ from pathlib import Path
 import fitz
 
 from estruturas.filaPrioridade import FilaPrioridadeMaxima
-from processamento.discurso import DiscursoProcessado
+from processamento.discurso import Discurso
 from processamento.geradorResumo import (
     calcularQuantidadeResumo,
     gerarResumoPdf,
@@ -16,7 +16,7 @@ from processamento.geradorResumo import (
 
 
 def criarDiscurso(indiceOriginal, relevancia, bitset, orador=None):
-    return DiscursoProcessado(
+    return Discurso(
         orador=orador or f"Orador {indiceOriginal}",
         frase=f"Frase {indiceOriginal}",
         bitset=bitset,

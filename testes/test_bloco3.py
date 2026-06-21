@@ -2,13 +2,13 @@ import unittest
 
 from estruturas.grafoMatriz import adicionarAresta, criarGrafo
 from processamento.centralidadeGrau import calcularCentralidadeGrau
-from processamento.discurso import DiscursoProcessado
+from processamento.discurso import Discurso
 
 
 class TestCentralidadeGrau(unittest.TestCase):
     def _criarDiscursos(self, quantidade):
         return [
-            DiscursoProcessado(orador=f"Orador {i}", frase=f"Frase {i}")
+            Discurso(orador=f"Orador {i}", frase=f"Frase {i}")
             for i in range(quantidade)
         ]
 

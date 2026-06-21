@@ -13,7 +13,7 @@ from estruturas.grafoMatriz import (
     imprimirGrafo,
     liberarGrafo,
 )
-from processamento.discurso import DiscursoProcessado
+from processamento.discurso import Discurso
 from processamento.modelagemGrafo import (
     calcularIndiceJaccard,
     construirGrafoSimilaridade,
@@ -55,10 +55,10 @@ class TestModelagemGrafo(unittest.TestCase):
 
     def testProcessaBloco2CriandoMatrizDensaSimetrica(self):
         discursos = [
-            DiscursoProcessado(orador="A", frase="frase 1", tokens=[0, 1], bitset=0b0011),
-            DiscursoProcessado(orador="Ignorado", frase="sim", tokens=[], bitset=0),
-            DiscursoProcessado(orador="B", frase="frase 2", tokens=[1, 2], bitset=0b0110),
-            DiscursoProcessado(orador="C", frase="frase 3", tokens=[3], bitset=0b1000),
+            Discurso(orador="A", frase="frase 1", tokens=[0, 1, 2, 3], bitset=0b1111),
+            Discurso(orador="Ignorado", frase="sim", tokens=[], bitset=0),
+            Discurso(orador="B", frase="frase 2", tokens=[1, 2, 3, 4], bitset=0b11110),
+            Discurso(orador="C", frase="frase 3", tokens=[5], bitset=0b100000),
         ]
 
         resultado = construirGrafoSimilaridade(discursos)
@@ -66,13 +66,13 @@ class TestModelagemGrafo(unittest.TestCase):
         self.assertEqual(resultado.grafo.quantidadeVertices, 2)
         self.assertEqual([discurso.frase for discurso in resultado.discursos], ["frase 1", "frase 2"])
         self.assertEqual(resultado.grafo.matrizAdjacencia[0][0], 0.0)
-        self.assertAlmostEqual(resultado.grafo.matrizAdjacencia[0][1], 1 / 3)
-        self.assertAlmostEqual(resultado.grafo.matrizAdjacencia[1][0], 1 / 3)
+        self.assertAlmostEqual(resultado.grafo.matrizAdjacencia[0][1], 3 / 5)
+        self.assertAlmostEqual(resultado.grafo.matrizAdjacencia[1][0], 3 / 5)
 
     def testSalvaMatrizAdjacenciaComoLinhasDeMatriz(self):
         discursos = [
-            DiscursoProcessado(orador="A", frase="frase 1", tokens=[0, 2], bitset=0b101),
-            DiscursoProcessado(orador="B", frase="frase 2", tokens=[0, 1], bitset=0b11),
+            Discurso(orador="A", frase="frase 1", tokens=[0, 1, 2, 4], bitset=0b10111),
+            Discurso(orador="B", frase="frase 2", tokens=[0, 1, 2, 3], bitset=0b1111),
         ]
         resultado = construirGrafoSimilaridade(discursos)
 
@@ -83,15 +83,15 @@ class TestModelagemGrafo(unittest.TestCase):
         linhas = conteudo.splitlines()
 
         self.assertEqual(linhas[0], "[")
-        self.assertEqual(linhas[1], "  [0.0, 0.3333333333333333],")
-        self.assertEqual(linhas[2], "  [0.3333333333333333, 0.0]")
+        self.assertEqual(linhas[1], "  [0.0, 0.6],")
+        self.assertEqual(linhas[2], "  [0.6, 0.0]")
         self.assertEqual(linhas[3], "]")
 
     def testSalvaDiscursosValidosComIndiceOriginal(self):
         discursos = [
-            DiscursoProcessado(orador="A", frase="frase 1", tokens=[0, 2], bitset=0b101),
-            DiscursoProcessado(orador="Ignorado", frase="sim", tokens=[], bitset=0),
-            DiscursoProcessado(orador="B", frase="frase 2", tokens=[1, 3], bitset=0b1010),
+            Discurso(orador="A", frase="frase 1", tokens=[0, 1, 2, 4], bitset=0b10111),
+            Discurso(orador="Ignorado", frase="sim", tokens=[], bitset=0),
+            Discurso(orador="B", frase="frase 2", tokens=[1, 2, 3, 5], bitset=0b101110),
         ]
         resultado = construirGrafoSimilaridade(discursos)
 
@@ -103,7 +103,7 @@ class TestModelagemGrafo(unittest.TestCase):
         self.assertEqual(len(dados), resultado.grafo.quantidadeVertices)
         self.assertEqual([item["indiceOriginal"] for item in dados], [0, 2])
         self.assertEqual([item["frase"] for item in dados], ["frase 1", "frase 2"])
-        self.assertEqual(dados[0]["bitset"], "0b101")
+        self.assertEqual(dados[0]["bitset"], "0b10111")
 
 
 if __name__ == "__main__":
