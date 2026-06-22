@@ -14,10 +14,10 @@ O projeto tem como objetivo um sistema de sumarização extrativa para debates l
 
 O processamento é dividido em quatro etapas:
 
-1. **Bloco 1 - Pré-processamento e Tokenização:**
-2. **Bloco 2 - Modelagem do Grafo Denso (Índice de Jaccard):**
-3. **Bloco 3 - Influência Relacional (Centralidade de Grau):**
-4. **Bloco 4 - Ranqueamento e Geração do Resumo:**
+1. **Bloco 1 - Pré-processamento e Tokenização:** limpeza estrutural, separação de orador e frase, tokenização e criação do vocabulário em tabela hash.
+2. **Bloco 2 - Modelagem do Grafo Denso (Índice de Jaccard):** construção da matriz de adjacência densa por similaridade de Jaccard.
+3. **Bloco 3 - Influência Relacional (Centralidade de Grau):** cálculo da centralidade de grau ponderada de cada frase.
+4. **Bloco 4 - Ranqueamento e Geração do Resumo:** seleção do resumo extrativo e geração das saídas JSON e PDF.
 
 Os PDFs de entrada devem ser colocados em `dados/entrada`. Para cada documento, o sistema cria uma pasta correspondente em `dados/saida`, contendo, entre outros arquivos, o vocabulário, a tabela hash, os discursos do grafo, a matriz de adjacência e o resumo extrativo em JSON e PDF.
 
