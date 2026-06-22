@@ -1,8 +1,16 @@
-# Grupo 7 - Sumarizador Legislativo
+# Grupo 7 - Tema C - Sumarizador Legislativo
+
+| Membro | Matrícula |
+| --- | --- |
+| Enrico Martins Mantoan Zoratto | 222006688 |
+| Caua Araujo dos Santos | 221022490 |
+| Weverton Rodrigues da Costa Silva | 221022767 |
+| Paulo Lucca | 170020339 |
+| Maria Clara Sena de Lima | 231012281 |
 
 ## Introdução
 
-Este é o projeto final de Estruturas de Dados 2 do Grupo 7. O sistema implementa uma sumarização extrativa de transcrições de debates parlamentares baseada em grafos.
+O projeto tem como objetivo desenvolver um sistema de sumarização extrativa para debates legislativos, utilizando grafos para identificar automaticamente os discursos mais representativos de uma sessão parlamentar. A arquitetura foi dividida em quatro blocos principais, responsáveis pelo processamento do texto, modelagem do grafo, cálculo de relevância e geração do resumo final.
 
 Cada frase válida do debate é representada por um vértice. As relações entre frases são calculadas com o Índice de Jaccard sobre bitsets de tokens, formando um grafo não direcionado e ponderado. A centralidade de grau ponderada identifica as frases mais conectadas; em seguida, uma fila de prioridades seleciona as frases para o resumo, reduzindo redundâncias e preservando a ordem cronológica original.
 
@@ -25,7 +33,7 @@ Os PDFs de entrada devem ser colocados em `dados/entrada`. Para cada documento, 
 
 ### Opção 1: Com o Makefile
 
-No Windows, abra um terminal na raiz do projeto.
+#### Windows
 
 ```powershell
 make install
@@ -35,11 +43,30 @@ make run
 
 O comando `make install` cria a virtual environment `venv` e instala as dependências. A ativação é necessária porque os alvos `run` e `test` usam o comando `python` disponível no terminal.
 
+#### Linux
+
+```bash
+make PYTHON=python3 install
+source venv/bin/activate
+make run
+```
+
 ### Opção 2: Sem Makefile
+
+#### Windows
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m processamento.main
+```
+
+#### Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m processamento.main
 ```
