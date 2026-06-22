@@ -2,24 +2,22 @@
 
 | Membro | Matrícula |
 | --- | --- |
-| Enrico Martins Mantoan Zoratto | 222006688 |
 | Caua Araujo dos Santos | 221022490 |
-| Weverton Rodrigues da Costa Silva | 221022767 |
-| Paulo Lucca | 170020339 |
+| Enrico Martins Mantoan Zoratto | 222006688 |
 | Maria Clara Sena de Lima | 231012281 |
+| Paulo Lucca | 170020339 |
+| Weverton Rodrigues da Costa Silva | 221022767 |
 
 ## Introdução
 
-O projeto tem como objetivo desenvolver um sistema de sumarização extrativa para debates legislativos, utilizando grafos para identificar automaticamente os discursos mais representativos de uma sessão parlamentar. A arquitetura foi dividida em quatro blocos principais, responsáveis pelo processamento do texto, modelagem do grafo, cálculo de relevância e geração do resumo final.
-
-Cada frase válida do debate é representada por um vértice. As relações entre frases são calculadas com o Índice de Jaccard sobre bitsets de tokens, formando um grafo não direcionado e ponderado. A centralidade de grau ponderada identifica as frases mais conectadas; em seguida, uma fila de prioridades seleciona as frases para o resumo, reduzindo redundâncias e preservando a ordem cronológica original.
+O projeto tem como objetivo um sistema de sumarização extrativa para debates legislativos, utilizando grafos para identificar automaticamente os discursos mais representativos de uma sessão parlamentar. A arquitetura foi dividida em quatro blocos principais, responsáveis pelo processamento do texto, modelagem do grafo, cálculo de relevância e geração do resumo final.
 
 O processamento é dividido em quatro etapas:
 
-1. Limpeza estrutural, separação de orador e frase, tokenização e criação do vocabulário em tabela hash.
-2. Construção da matriz de adjacência densa por similaridade de Jaccard.
-3. Cálculo da centralidade de grau ponderada de cada frase.
-4. Seleção do resumo extrativo e geração das saídas JSON e PDF.
+1. **Bloco 1 - Pré-processamento e Tokenização:**
+2. **Bloco 2 - Modelagem do Grafo Denso (Índice de Jaccard):**
+3. **Bloco 3 - Influência Relacional (Centralidade de Grau):**
+4. **Bloco 4 - Ranqueamento e Geração do Resumo:**
 
 Os PDFs de entrada devem ser colocados em `dados/entrada`. Para cada documento, o sistema cria uma pasta correspondente em `dados/saida`, contendo, entre outros arquivos, o vocabulário, a tabela hash, os discursos do grafo, a matriz de adjacência e o resumo extrativo em JSON e PDF.
 
@@ -90,14 +88,6 @@ O `Makefile` disponibiliza os seguintes alvos:
 | `make test` | Executa os testes automatizados em `testes/`. |
 | `make clean` | Remove `dados/saida`, `.pytest_cache` e pastas `__pycache__`. |
 | `make all` | Executa `make install` e `make run`. |
-
-Após ativar a virtual environment, execute os comandos desejados:
-
-```powershell
-make test
-make clean
-make run
-```
 
 ## Saídas
 
