@@ -53,9 +53,9 @@ O sistema já é capaz de gerar a rede de similaridade entre os discursos, produ
 
 Identificar quais discursos possuem maior importância dentro da rede construída.
 
-### Implementação Prevista
+### Implementação
 
-A relevância de cada discurso será calculada por meio da centralidade de grau ponderada. Para cada vértice do grafo, serão somados os pesos das arestas incidentes, produzindo uma nota de relevância.
+A relevância de cada discurso é calculada por meio da centralidade de grau ponderada. Para cada vértice do grafo, são somados os pesos das arestas incidentes, produzindo uma nota de relevância.
 
 ### Alteração de Modelagem
 
@@ -82,7 +82,7 @@ Com essa alteração:
 
 Selecionar os discursos mais relevantes de forma proporcional ao tamanho do documento, filtrando redundâncias e preservando a cronologia do debate para compor um resumo extrativo coeso.
 
-### Implementação Prevista
+### Implementação
 * Definição Dinâmica de Limite: Cálculo do valor de "K" (quantidade de extrações) baseado em uma porcentagem do total de discursos.
 * Ranqueamento: Inserção dos discursos (e seus respectivos scores) em uma fila de prioridades (Max-Heap).
 * Extração com Filtro Anti-Redundância: Remoção iterativa dos discursos de maior relevância do topo da Max-Heap, validando-os através de uma operação lógica `AND` com o "Bitset do Resumo" para descartar frases repetitivas. Discursos aceitos atualizam o filtro com uma operação `OR`.
