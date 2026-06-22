@@ -1,0 +1,64 @@
+class MaxHeapDiscursos:
+    def __init__(self):
+        self.heap = []
+
+    def _pai(self, i):
+        return (i - 1) // 2
+
+    def _filho_esquerdo(self, i):
+        return 2 * i + 1
+
+    def _filho_direito(self, i):
+        return 2 * i + 2
+
+    def _swap(self, i, j):
+        self.heap[i], self.heap[j] = self.heap[j], self.heap[i]
+
+    # --- Operações Principais ---
+    def inserir(self, discurso):
+
+        self.heap.append(discurso)
+        self._heapify_up(len(self.heap) - 1)
+
+    def extrair_max(self):
+
+        if len(self.heap) == 0:
+            return None
+        
+        if len(self.heap) == 1:
+            return self.heap.pop()
+
+        max_discurso = self.heap[0]
+        
+        self.heap[0] = self.heap.pop()
+        
+        self._heapify_down(0)
+        
+        return max_discurso
+
+    def _heapify_up(self, i):
+        while i > 0 and self.heap[i].score > self.heap[self._pai(i)].score:
+            self._swap(i, self._pai(i))
+            i = self._pai(i) 
+
+    def _heapify_down(self, i):
+        maior = i
+        esq = self._filho_esquerdo(i)
+        dir = self._filho_direito(i)
+        n = len(self.heap)
+
+        if esq < n and self.heap[esq].score > self.heap[maior].score:
+            maior = esq
+        
+        if dir < n and self.heap[dir].score > self.heap[maior].score:
+            maior = dir
+
+        if maior != i:
+            self._swap(i, maior)
+            self._heapify_down(maior)
+
+    def is_empty(self):
+        return len(self.heap) == 0
+    
+    def tamanho(self):
+        return len(self.heap)
