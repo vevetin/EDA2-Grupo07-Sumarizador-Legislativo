@@ -106,4 +106,4 @@ Para evitar que o resumo final contenha frases repetitivas de alta relevância.
 
 ##### 3. Organização da Saída (Ordem Cronológica)
 Para preservar a lógica original do debate e formato de "Perguntas e Respostas".
-* **Implementação:** Os discursos escolhidos para o Top-K são reordenados utilizando um atributo `indiceOriginal` de cada frase, que guarda a posição no documento nativo, montando um PDF fluido, coerente e com os diálogos agrupados adequadamente pelo orador.
+* **Implementação:** Os discursos escolhidos para o Top-K são reordenados aplicando-se o algoritmo Quick Sort, utilizando como chave de busca o atributo `indiceOriginal` de cada frase (que guarda a sua posição no documento nativo). Essa abordagem garante uma ordenação altamente eficiente, resultando na montagem de um PDF fluido, coerente e com os diálogos agrupados adequadamente pelo orador original.
