@@ -21,6 +21,11 @@ O processamento é dividido em quatro etapas:
 
 Os PDFs de entrada devem ser colocados em `dados/entrada`. Para cada documento, o sistema cria uma pasta correspondente em `dados/saida`, contendo, entre outros arquivos, o vocabulário, a tabela hash, os discursos do grafo, a matriz de adjacência e o resumo extrativo em JSON e PDF.
 
+## Documentação
+
+- [Apresentação Final (PDF)](Grupo07_Sumarizacao_Extrativa.pdf)
+- [Apresentação Final (PPTX)](Grupo07_Sumarizacao_Extrativa.pptx)
+
 ## Requisitos
 
 - Python 3
